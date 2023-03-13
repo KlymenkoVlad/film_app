@@ -1,19 +1,36 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { Typography, Button, Box } from '@mui/material';
+import { ExitToApp } from '@mui/icons-material';
 import { userSelector } from '../../features/auth';
-
-// name or id get
-// display it
 
 function Profile() {
   const { user } = useSelector(userSelector);
 
-  console.log(user);
+  const favoriteMovies = [];
+
+  const logout = () => {
+    localStorage.clear();
+
+    window.location.href = '/';
+  };
 
   return (
-    <div>
-      <h3>Profile of {user.username} with id - {user.id}</h3>
-    </div>
+    <Box>
+      <Box display="flex" jusfityContent="space-between">
+        <Typography variant="h4" gutterBottom>My Profile</Typography>
+        <Button color="inherit" onClick={logout}>
+          Logout &nbsp; <ExitToApp />
+        </Button>
+      </Box>
+      {!favoriteMovies.length
+        ? <Typography variant="h5">Ad d favorites or watchlist some movies to see them here!</Typography>
+        : (
+          <Box>
+            FAVORITE MOVIES
+          </Box>
+        )}
+    </Box>
   );
 }
 
