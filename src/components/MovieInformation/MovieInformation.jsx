@@ -1,21 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Modal, Typography, Button, ButtonGroup, Grid, Box, CircularProgress, useMediaQuery, Rating } from '@mui/material';
 import { Movie as MovieIcon, Theaters, Language, PlusOne, Favorite, FavoriteBorderOutlined, Remove, ArrowBack } from '@mui/icons-material';
 import { Link, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 
-import { useGetMovieQuery } from '../../services/TMDB';
+import { useGetMovieQuery, useGetRecomendationsQuery } from '../../services/TMDB';
 import { selectGenreOrCategory } from '../../features/currentGenreOrCategory';
 import genreIcons from '../../assets/genres';
 import useStyles from './styles';
+import { MovieList } from '..';
 
 function MovieInformation() {
   const { id } = useParams();
   const { data, isFetching, error } = useGetMovieQuery(id);
   const classes = useStyles();
   const dispatch = useDispatch();
+  const { data: recommendations, isFetching: isRecommendationsFetching } = useGetRecomendationsQuery({ list: '/recommendations', movie_id: id });
 
+  const [open, setOpen] = useState(false);
   const isMovieFavorited = true;
   const isMovieWatchlisted = true;
 
@@ -108,7 +111,7 @@ function MovieInformation() {
                 <ButtonGroup size="small" variant="outlined">
                   <Button target="_black" rel="noopener noreferrer" href={data?.homepage} endIcon={<Language />}>Website</Button>
                   <Button target="_black" rel="noopener noreferrer" href={`https://www.imdb.com/title/${data?.imdb_id}`} endIcon={<MovieIcon />}>IMDB</Button>
-                  <Button onClick={() => {}} href="#" endIcon={<Theaters />}>Trailer</Button>
+                  <Button onClick={() => setOpen(true)} href="#" endIcon={<Theaters />}>Trailer</Button>
                 </ButtonGroup>
               </Grid>
               <Grid item xs={12} sm={6} className={classes.buttonsContainer}>
@@ -130,6 +133,31 @@ function MovieInformation() {
           </Grid>
         </Grid>
       </Grid>
+      <Box marginTop="5rem" width="100%">
+        <Typography variant="h3" gutterBottom align="center">
+          You might also like
+        </Typography>
+        {recommendations
+          ? <MovieList movies={recommendations} numberOfMovies={12} />
+          : <Box>Sorry, nothing was found.</Box>}
+      </Box>
+      <Modal
+        closeAfterTransition
+        className={classes.modal}
+        open={open}
+        onClose={() => setOpen(false)}
+      >
+        {data.videos.results.length > 0 && (
+          <iframe
+            autoPlay
+            className={classes.video}
+            frameBorder="0"
+            title="Trailer"
+            src={`https://www.youtube.com/embed/${data.videos.results[0].key}`}
+            allow="autoplay"
+          />
+        )}
+      </Modal>
     </Grid>
   );
 }
