@@ -4,7 +4,7 @@ export default makeStyles((theme) => ({
   containerSpaceAround: {
     display: 'flex',
     justifyContent: 'space-around',
-    // margin: '10px 0 !important',
+    margin: '10px 0 !important',
     [theme.breakpoints.down('sm')]: {
       flexDirection: 'column',
       flexWrap: 'wrap',
@@ -12,12 +12,11 @@ export default makeStyles((theme) => ({
   },
   poster: {
     borderRadius: '20px',
-    boxShadow: '0.5em 0.5em 1em rgb(64, 64, 70)',
-    maxWidth: '80%',
-    objectFit: 'cover',
+    boxShadow: '0.5em 1em 1em rgb(64, 64, 70)',
+    width: '70%',
     [theme.breakpoints.down('md')]: {
       margin: '0 auto !imporatant',
-      width: '50%',
+      width: '60%',
     },
     [theme.breakpoints.down('sm')]: {
       margin: '0 auto !imporatant',
@@ -48,17 +47,20 @@ export default makeStyles((theme) => ({
   castImage: {
     width: '100%',
     maxWidth: '7em',
-    height: '8em',
     objectFit: 'cover',
     borderRadius: '10px',
   },
-  buttonsContainer: {
+  buttonContainer: {
     display: 'flex',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     width: '100%',
     [theme.breakpoints.down('sm')]: {
       flexDirection: 'column',
+      justifyContent: 'center',
     },
+  },
+  buttonSection: {
+    display: 'flex',
   },
   modal: {
     display: 'flex',
