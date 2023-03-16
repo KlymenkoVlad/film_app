@@ -4,7 +4,7 @@ export default makeStyles((theme) => ({
   containerSpaceAround: {
     display: 'flex',
     justifyContent: 'space-around',
-    margin: '10px 0 !important',
+    // margin: '10px 0 !important',
     [theme.breakpoints.down('sm')]: {
       flexDirection: 'column',
       flexWrap: 'wrap',
@@ -12,8 +12,9 @@ export default makeStyles((theme) => ({
   },
   poster: {
     borderRadius: '20px',
-    boxShadow: '0.5em 1em 1em rgb(64, 64, 70)',
-    width: '80%',
+    boxShadow: '0.5em 0.5em 1em rgb(64, 64, 70)',
+    maxWidth: '80%',
+    objectFit: 'cover',
     [theme.breakpoints.down('md')]: {
       margin: '0 auto !imporatant',
       width: '50%',
