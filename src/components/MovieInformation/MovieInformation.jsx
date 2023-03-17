@@ -12,13 +12,14 @@ import { selectGenreOrCategory } from '../../features/currentGenreOrCategory';
 import genreIcons from '../../assets/genres';
 
 function MovieInfo() {
+  const { id } = useParams();
+  const { data, error, isFetching } = useGetMovieQuery(id);
+
   const classes = useStyles();
   const dispatch = useDispatch();
-  const { id } = useParams();
   const [open, setOpen] = useState(false);
 
   const { data: recommendations, isFetching: isRecommendationsFetching, isError: isRecommendationsError } = useGetRecommendationsQuery({ list: '/recommendations', movie_id: id });
-  const { data, error, isFetching } = useGetMovieQuery(id);
 
   const isMovieFavorited = false;
   const isMovieWatchlisted = false;
@@ -71,7 +72,7 @@ function MovieInfo() {
             </Typography>
           </Box>
           <Typography variant="h6" gutterBottom style={{ marginLeft: '10px' }}>
-            {data?.runtime}min | Language: {data?.spoken_languages[0].name}
+            {data?.runtime}min | Language: {data?.spoken_languages[0]?.name}
           </Typography>
         </Grid>
         <Grid item className={classes.genresContainer}>
@@ -137,13 +138,16 @@ function MovieInfo() {
           ? <MovieList movies={recommendations} numberOfMovies={12} />
           : <Box>Sorry, nothing was found.</Box>}
       </Box>
+      {
+        console.log(data.videos.results.length)
+      }
       <Modal
         closeAfterTransition
         className={classes.modal}
         open={open}
         onClose={() => setOpen(false)}
       >
-        {data?.videos?.results?.length > 0 && (
+        {data?.videos?.results?.length > 0 ? (
           <iframe
             autoPlay
             className={classes.video}
@@ -152,6 +156,8 @@ function MovieInfo() {
             src={`https://www.youtube.com/embed/${data.videos.results[0].key}`}
             allow="autoplay"
           />
+        ) : (
+          <div style={{ color: 'white' }}>Sadly, but we can`t find trailer for this movie :(  <br /> Click somewhere</div>
         )}
       </Modal>
     </Grid>
