@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Modal, Typography, Button, ButtonGroup, Grid, Box, CircularProgress, useMediaQuery, Rating } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Modal, Typography, Button, ButtonGroup, Grid, Box, CircularProgress, Rating } from '@mui/material';
 import { Movie as MovieIcon, Theaters, Language, PlusOne, Favorite, FavoriteBorderOutlined, Remove, ArrowBack } from '@mui/icons-material';
 import { Link, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -7,28 +7,51 @@ import axios from 'axios';
 
 import useStyles from './styles';
 import { MovieList } from '../index';
-import { useGetMovieQuery, useGetRecommendationsQuery } from '../../services/TMDB';
+import { useGetListQuery, useGetMovieQuery, useGetRecommendationsQuery } from '../../services/TMDB';
 import { selectGenreOrCategory } from '../../features/currentGenreOrCategory';
 import genreIcons from '../../assets/genres';
+import { userSelector } from '../../features/auth';
 
 function MovieInfo() {
+  const { user } = useSelector(userSelector);
+  const { id } = useParams();
   const classes = useStyles();
   const dispatch = useDispatch();
-  const { id } = useParams();
   const [open, setOpen] = useState(false);
 
-  const { data: recommendations, isFetching: isRecommendationsFetching, isError: isRecommendationsError } = useGetRecommendationsQuery({ list: '/recommendations', movie_id: id });
   const { data, error, isFetching } = useGetMovieQuery(id);
+  const { data: favoriteMovies } = useGetListQuery({ listName: 'favorite/movies', accountId: user.id, sessionId: localStorage.getItem('session_id'), page: 1 });
+  const { data: watchlistMovies } = useGetListQuery({ listName: 'watchlist/movies', accountId: user.id, sessionId: localStorage.getItem('session_id'), page: 1 });
+  const { data: recommendations, isFetching: isRecommendationsFetching, isError: isRecommendationsError } = useGetRecommendationsQuery({ list: '/recommendations', movie_id: id });
 
-  const isMovieFavorited = false;
-  const isMovieWatchlisted = false;
+  const [isMovieFavorited, setIsMovieFavorited] = useState(false);
+  const [isMovieWatchlisted, setIsMovieWatchlisted] = useState(false);
+
+  useEffect(() => {
+    setIsMovieFavorited(!!favoriteMovies?.results?.find((movie) => movie?.id === data?.id));
+  }, [favoriteMovies, data]);
+  useEffect(() => {
+    setIsMovieWatchlisted(!!watchlistMovies?.results?.find((movie) => movie?.id === data?.id));
+  }, [watchlistMovies, data]);
 
   const addToFavorites = async () => {
+    await axios.post(`https://api.themoviedb.org/3/account/${user.id}/favorite?api_key=${process.env.REACT_APP_TMDB_KEY}&session_id=${localStorage.getItem('session_id')}`, {
+      media_type: 'movie',
+      media_id: id,
+      favorite: !isMovieFavorited,
+    });
 
+    setIsMovieFavorited((prev) => !prev);
   };
 
   const addToWatchList = async () => {
+    await axios.post(`https://api.themoviedb.org/3/account/${user.id}/watchlist?api_key=${process.env.REACT_APP_TMDB_KEY}&session_id=${localStorage.getItem('session_id')}`, {
+      media_type: 'movie',
+      media_id: id,
+      watchlist: !isMovieWatchlisted,
+    });
 
+    setIsMovieWatchlisted((prev) => !prev);
   };
 
   if (isFetching || isRecommendationsFetching) {
@@ -71,7 +94,7 @@ function MovieInfo() {
             </Typography>
           </Box>
           <Typography variant="h6" gutterBottom style={{ marginLeft: '10px' }}>
-            {data?.runtime}min | Language: {data?.spoken_languages[0].name}
+            {data?.runtime}min | Language: {data?.spoken_languages[0]?.name}
           </Typography>
         </Grid>
         <Grid item className={classes.genresContainer}>
@@ -143,7 +166,7 @@ function MovieInfo() {
         open={open}
         onClose={() => setOpen(false)}
       >
-        {data?.videos?.results?.length > 0 && (
+        {data?.videos?.results?.length > 0 ? (
           <iframe
             autoPlay
             className={classes.video}
@@ -152,6 +175,8 @@ function MovieInfo() {
             src={`https://www.youtube.com/embed/${data.videos.results[0].key}`}
             allow="autoplay"
           />
+        ) : (
+          <div style={{ color: 'white' }}>Sadly, but we can`t find trailer for this movie :(  <br /> Click somewhere</div>
         )}
       </Modal>
     </Grid>
